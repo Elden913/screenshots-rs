@@ -3,20 +3,19 @@ use png::{BitDepth, ColorType, Encoder, EncodingError};
 pub struct Image {
   width: u32,
   height: u32,
-  buffer: Vec<u8>,
+  bytes: Vec<u8>,
 }
 
 impl Image {
-  pub fn new(width: u32, height: u32, buffer: Vec<u8>) -> Self {
+  pub fn new(width: u32, height: u32, bytes: Vec<u8>) -> Self {
     Image {
       width,
       height,
-      buffer,
+      bytes,
     }
   }
 
   pub fn from_bgra(width: u32, height: u32, bgra: Vec<u8>) -> Result<Self, EncodingError> {
-    let mut buffer = Vec::new();
     let mut bytes = bgra;
 
     // BGRA 转换为 RGBA
@@ -29,16 +28,7 @@ impl Image {
       bytes[i + 3] = 255;
     }
 
-    let mut encoder = Encoder::new(&mut buffer, width, height);
-
-    encoder.set_color(ColorType::Rgba);
-    encoder.set_depth(BitDepth::Eight);
-
-    let mut writer = encoder.write_header()?;
-    writer.write_image_data(&bytes)?;
-    writer.finish()?;
-
-    Ok(Image::new(width, height, buffer))
+    Ok(Image::new(width, height, bytes))
   }
 
   pub fn width(&self) -> u32 {
@@ -49,7 +39,7 @@ impl Image {
     self.height
   }
 
-  pub fn buffer(&self) -> &Vec<u8> {
-    &self.buffer
+  pub fn bytes(&self) -> &Vec<u8> {
+    &self.bytes
   }
 }
